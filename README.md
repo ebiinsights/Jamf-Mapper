@@ -1,6 +1,6 @@
-# JamfMapper
+# Jamf Mapper
 
-JamfMapper is a native macOS SwiftUI application designed to securely crawl Jamf Pro configuration objects, map their dependencies into a local graph, and provide deep insights to help you audit and optimize your Jamf environment.
+Jamf Mapper is a native macOS SwiftUI application designed to securely crawl Jamf Pro configuration objects, map their dependencies into a local graph, and provide deep insights to help you audit and optimize your Jamf environment.
 
 ![JamfMapper Homepage](docs/screenshot.png)
 
