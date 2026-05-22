@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Security Analysis Report for JamfMapper">
+    <title>JamfMapper Security Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-primary: #00f2fe;
+            --accent-secondary: #4facfe;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(79, 172, 254, 0.12), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(0, 242, 254, 0.12), transparent 25%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 950px;
+            margin: 3rem auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 0;
+            background: linear-gradient(135deg, var(--accent-secondary), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1.5px;
+            line-height: 1.2;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            margin-top: 0.75rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 2.25rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(0, 242, 254, 0.05), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .section-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px -10px rgba(0, 242, 254, 0.15);
+            background: rgba(255, 255, 255, 0.035);
+            border-color: rgba(79, 172, 254, 0.3);
+        }
+
+        .section-card:hover::before {
+            opacity: 1;
+        }
+
+        .section-card h2 {
+            font-size: 1.4rem;
+            margin-top: 0;
+            margin-bottom: 1.25rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+        }
+
+        .section-card h2 svg {
+            width: 26px;
+            height: 26px;
+            color: var(--accent-primary);
+            filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.4));
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+        }
+
+        .badge.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            position: relative;
+            padding-left: 1.75rem;
+            margin-bottom: 0.85rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+            font-weight: bold;
+            opacity: 0.8;
+        }
+
+        li strong {
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+        
+        li code {
+            background: rgba(255,255,255,0.05);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #e2e8f0;
+            font-size: 0.85rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 3.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .glass-card {
+                padding: 2.5rem 1.5rem;
+            }
+            h1 {
+                font-size: 2.5rem;
+            }
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<main class="container">
+    <div class="glass-card">
+        <header>
+            <h1>Security Analysis</h1>
+            <p>JamfMapper Project Audit Report</p>
+        </header>
+
+        <div class="grid-layout">
+            <!-- Security Module -->
+            <section class="section-card">
+                <h2>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    Credential Security
+                </h2>
+                <div class="badge success">Verified Secure</div>
+                <ul>
+                    <li><strong>No hardcoded secrets</strong> found anywhere in the source code.</li>
+                    <li>Secure macOS Keychain integration utilizing <code>kSecClassGenericPassword</code>.</li>
+                    <li>Employs <code>kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code> for strict access control restrictions.</li>
+                    <li>GRDB local database avoids storing cleartext tokens or secrets entirely.</li>
+                </ul>
+            </section>
+
+            <!-- Code Quality Module -->
+            <section class="section-card">
+                <h2>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    Code Architecture
+                </h2>
+                <div class="badge success">Highly Optimized</div>
+                <ul>
+                    <li>Modern, robust <strong>Swift 6 concurrency</strong> (<code>async/await</code>, <code>actor</code>, <code>@Sendable</code>) prevents data races.</li>
+                    <li>Clean separation of concerns with strictly enforced single-responsibility modules.</li>
+                    <li>Efficient endpoint catalog mapping (<code>JamfEndpointCatalog</code>) minimizes redundant network calls.</li>
+                </ul>
+            </section>
+
+            <!-- Git Sanitization Module -->
+            <section class="section-card" style="grid-column: 1 / -1;">
+                <h2>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
+                    GitHub Sanitization Status
+                </h2>
+                <div class="badge success">Cleaned & Ready</div>
+                <p style="color: var(--text-muted); margin-bottom: 1.25rem; font-size: 0.95rem;">
+                    The repository has been successfully audited and rigorously sanitized for its upload to GitHub. 
+                    Compiled binaries and IDE state files have been isolated.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <ul>
+                        <li><code>dist/</code> directory excluded from <code>.gitignore</code> to isolate compiled App bundle binaries.</li>
+                        <li><code>.DS_Store</code> ignored automatically.</li>
+                    </ul>
+                    <ul>
+                        <li><code>DerivedData/</code> and <code>xcuserdata/</code> safely ignored to prevent leaking developer environment configurations.</li>
+                        <li><strong>Ready for <code>git init</code> and push.</strong></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <div class="footer">
+            <p>Generated by Gemini AI • JamfMapper Project Analysis Dashboard</p>
+        </div>
+    </div>
+</main>
+
+<script>
+    // Subtle interactivity
+    document.querySelectorAll('.section-card').forEach(card => {
+        card.addEventListener('mousemove', e => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
+        });
+    });
+</script>
+</body>
+</html>
