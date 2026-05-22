@@ -102,15 +102,11 @@ public actor JamfAPIClient {
         var request = URLRequest(url: baseURL.appendingPathComponent("api/v1/oauth/token"))
         request.httpMethod = "POST"
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        let body = [
-            "grant_type": "client_credentials",
-            "client_id": clientID,
-            "client_secret": clientSecret
-        ]
-        request.httpBody = body
-            .map { "\($0.key)=\($0.value.urlQueryEscaped)" }
-            .joined(separator: "&")
-            .data(using: .utf8)
+        request.httpBody = FormURLEncoder.encode([
+            ("client_id", clientID),
+            ("grant_type", "client_credentials"),
+            ("client_secret", clientSecret)
+        ])
 
         let (data, response) = try await session.data(for: request)
         try validate(response: response, data: data)

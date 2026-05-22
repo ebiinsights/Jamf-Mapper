@@ -26,6 +26,23 @@ public extension String {
     }
 }
 
+public enum FormURLEncoder {
+    private static let allowedCharacters = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "-._*"))
+
+    public static func encode(_ items: [(String, String)]) -> Data {
+        let body = items
+            .map { "\(escape($0.0))=\(escape($0.1))" }
+            .joined(separator: "&")
+        return Data(body.utf8)
+    }
+
+    public static func escape(_ value: String) -> String {
+        value
+            .addingPercentEncoding(withAllowedCharacters: allowedCharacters)?
+            .replacingOccurrences(of: "%20", with: "+") ?? value
+    }
+}
+
 public enum JamfMapperError: LocalizedError, Sendable {
     case invalidURL
     case invalidResponse
