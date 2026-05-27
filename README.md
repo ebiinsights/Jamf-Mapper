@@ -6,7 +6,7 @@ Jamf Mapper is a native macOS application for Jamf Pro administrators who need a
 
 ## What It Does
 
-- Connects to Jamf Cloud or on-prem Jamf Pro tenants with API Client ID and Client Secret.
+- Connects to Jamf Cloud tenants with API Client ID and Client Secret.
 - Stores API client secrets in macOS Keychain, not in source files, UserDefaults, or SQLite.
 - Crawls Jamf objects into local snapshots so each crawl is auditable and repeatable.
 - Maps relationships between policies, smart groups, static groups, extension attributes, scripts, packages, categories, profiles, patch objects, prestages, and other supported objects.
